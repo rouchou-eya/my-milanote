@@ -1,12 +1,12 @@
-import { useState, useCallback } from 'react';
 import {
   ReactFlow,
   Background,
   Controls,
-  applyNodeChanges,
+  useNodesState,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
+// Custom Milanote-style Note Card component
 function NoteCard({ data }) {
   return (
     <div style={{
@@ -38,7 +38,7 @@ function NoteCard({ data }) {
 const nodeTypes = { noteCard: NoteCard };
 
 export default function App() {
-  const [nodes, setNodes] = useState([
+  const [nodes, setNodes, onNodesChange] = useNodesState([
     {
       id: '1',
       type: 'noteCard',
@@ -46,11 +46,6 @@ export default function App() {
       data: { text: 'Welcome to your infinite board! Drag me or type here.' },
     },
   ]);
-
-  const onNodesChange = useCallback(
-    (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
-    []
-  );
 
   const addNote = () => {
     const newNode = {
@@ -64,6 +59,7 @@ export default function App() {
 
   return (
     <div style={{ display: 'flex', width: '100vw', height: '100vh' }}>
+      {/* Milanote-style Left Sidebar */}
       <div style={{
         width: '72px',
         background: '#f8fafc',
@@ -92,6 +88,7 @@ export default function App() {
         </button>
       </div>
 
+      {/* Infinite Dot-Grid Canvas */}
       <div style={{ flex: 1, height: '100%' }}>
         <ReactFlow
           nodes={nodes}
@@ -106,3 +103,4 @@ export default function App() {
     </div>
   );
 }
+
