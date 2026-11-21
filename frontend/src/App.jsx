@@ -7,7 +7,8 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
-const API_URL = 'http://127.0.0';
+const API_URL = 'http://localhost:5000/items';
+
 
 // Custom Milanote-style Note Card component
 function NoteCard({ id, data }) {
