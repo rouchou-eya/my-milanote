@@ -1,3 +1,4 @@
+import { useEffect, useCallback } from 'react';
 import {
   ReactFlow,
   Background,
@@ -6,8 +7,19 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 
+const API_URL = 'http://127.0.0';
+
 // Custom Milanote-style Note Card component
-function NoteCard({ data }) {
+function NoteCard({ id, data }) {
+  // Save text to SQLite the moment you click outside the note
+  const handleBlur = (e) => {
+    fetch(`${API_URL}/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: e.target.value }),
+    });
+  };
+
   return (
     <div style={{
       background: '#ffffff',
@@ -20,6 +32,7 @@ function NoteCard({ data }) {
       <textarea
         className="nodrag"
         defaultValue={data.text}
+        onBlur={handleBlur}
         placeholder="Type a note..."
         style={{
           width: '100%',
@@ -29,6 +42,8 @@ function NoteCard({ data }) {
           resize: 'vertical',
           fontFamily: 'sans-serif',
           fontSize: '14px',
+          background: 'transparent',
+          color: '#1e293b',
         }}
       />
     </div>
@@ -38,31 +53,55 @@ function NoteCard({ data }) {
 const nodeTypes = { noteCard: NoteCard };
 
 export default function App() {
-  const [nodes, setNodes, onNodesChange] = useNodesState([
-    {
-      id: '1',
-      type: 'noteCard',
-      position: { x: 250, y: 150 },
-      data: { text: 'Welcome to your infinite board! Drag me or type here.' },
-    },
-  ]);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
 
+  // 1. Load all saved notes from SQLite when the page opens
+  useEffect(() => {
+    fetch(API_URL)
+      .then((res) => res.json())
+      .then((savedNodes) => setNodes(savedNodes));
+  }, [setNodes]);
+
+  // 2. Create a new note and save it immediately to SQLite
   const addNote = () => {
+    const newId = String(Date.now());
+    const x = Math.round(Math.random() * 300 + 150);
+    const y = Math.round(Math.random() * 200 + 100);
+
     const newNode = {
-      id: String(Date.now()),
+      id: newId,
       type: 'noteCard',
-      position: { x: Math.random() * 300 + 150, y: Math.random() * 200 + 100 },
+      position: { x, y },
       data: { text: '' },
     };
+
     setNodes((nds) => [...nds, newNode]);
+
+    fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: newId, content: '', x, y }),
+    });
   };
 
+  // 3. Save the card's new (x, y) coordinates when you stop dragging it
+  const onNodeDragStop = useCallback((event, node) => {
+    fetch(`${API_URL}/${node.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        x: Math.round(node.position.x),
+        y: Math.round(node.position.y),
+      }),
+    });
+  }, []);
+
   return (
-    <div style={{ display: 'flex', width: '100vw', height: '100vh' }}>
+    <div style={{ display: 'flex', width: '100vw', height: '100vh', background: '#f8fafc' }}>
       {/* Milanote-style Left Sidebar */}
       <div style={{
         width: '72px',
-        background: '#f8fafc',
+        background: '#ffffff',
         borderRight: '1px solid #e2e8f0',
         display: 'flex',
         flexDirection: 'column',
@@ -81,6 +120,7 @@ export default function App() {
             cursor: 'pointer',
             fontSize: '12px',
             fontWeight: 'bold',
+            color: '#1e293b',
             boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
           }}
         >
@@ -93,6 +133,7 @@ export default function App() {
         <ReactFlow
           nodes={nodes}
           onNodesChange={onNodesChange}
+          onNodeDragStop={onNodeDragStop}
           nodeTypes={nodeTypes}
           deleteKeyCode={null}
         >
@@ -103,4 +144,3 @@ export default function App() {
     </div>
   );
 }
-
