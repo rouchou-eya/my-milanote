@@ -351,7 +351,7 @@ function CanvasBoard() {
 
   return (
     <div style={{ display: 'flex', width: '100vw', height: '100vh', background: boardBg }}>
-      {/* Compact Left Sidebar with Click-or-Drag Note Icon */}
+      {/* Compact Left Sidebar: + quick add, draggable Note icon */}
       <div
         style={{
           width: '64px',
@@ -361,30 +361,55 @@ function CanvasBoard() {
           flexDirection: 'column',
           alignItems: 'center',
           paddingTop: '20px',
-          gap: '16px',
+          gap: '18px',
           zIndex: 10,
         }}
       >
-        <div
-          draggable
-          onDragStart={(e) => e.dataTransfer.setData('application/reactflow', 'noteCard')}
+        {/* + quick add */}
+        <button
           onClick={handleSidebarClick}
-          title="Click to add or Drag onto board"
+          title="Add note"
+          style={{
+            width: '34px',
+            height: '34px',
+            borderRadius: '50%',
+            border: 'none',
+            background: '#db2777',
+            color: '#ffffff',
+            fontSize: '22px',
+            lineHeight: '1',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          +
+        </button>
+
+        {/* Note icon: only the icon is draggable */}
+        <div
           style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            cursor: 'grab',
-            userSelect: 'none',
             gap: '4px',
+            userSelect: 'none',
           }}
         >
-          <svg width="30" height="30" viewBox="0 0 24 24" fill="#fff1f2" stroke="#db2777" strokeWidth="1.8">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-            <polyline points="14 2 14 8 20 8" />
-            <line x1="8" y1="13" x2="16" y2="13" />
-            <line x1="8" y1="17" x2="13" y2="17" />
-          </svg>
+          <div
+            draggable
+            onDragStart={(e) => e.dataTransfer.setData('application/reactflow', 'noteCard')}
+            title="Drag onto board"
+            style={{ cursor: 'grab', lineHeight: 0 }}
+          >
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="#fff1f2" stroke="#db2777" strokeWidth="1.8">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="8" y1="13" x2="16" y2="13" />
+              <line x1="8" y1="17" x2="13" y2="17" />
+            </svg>
+          </div>
           <span style={{ fontSize: '11px', fontWeight: '600', color: '#475569' }}>Note</span>
         </div>
       </div>
@@ -403,10 +428,12 @@ function CanvasBoard() {
           nodesConnectable={false}
           nodeTypes={nodeTypes}
           deleteKeyCode={null}
+          colorMode="light"
+          style={{ background: boardBg }}
         >
           <Background variant="dots" gap={20} size={1.2} color={dotColor} />
 
-          {/* Minimalist Vertical Controls (+ on top of -, Fit, Lock) + Board Color Button */}
+          {/* Minimalist Vertical Controls + Board Color Button */}
           <Controls position="bottom-left" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
             <button
               className="react-flow__controls-button"
@@ -481,7 +508,7 @@ function CanvasBoard() {
           </div>
         )}
 
-        {/* Minimalist Bottom-Center Live Zoom Percentage Indicator */}
+        {/* Bottom-Center Live Zoom Percentage Indicator */}
         <button
           onClick={() => zoomTo(1)}
           title="Click to reset zoom to 100%"
